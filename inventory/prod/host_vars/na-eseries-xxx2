@@ -1,0 +1,88 @@
+datacenter: zzz
+netapp_eseries_ssid: eseries-zzz2-01
+netapp_eseries_api_url: https://eseries-proxy01.example.com/devmgr/v2
+netapp_eseries_api_username: rw
+
+netapp_eseries_storage_systems:
+  eseries-zzz2-01:
+    address1: "192.X.XX.XXX"
+    address2: "192.X.XX.XXX"
+
+netapp_eseries_storage_pools:
+  dp_hdd_01:
+    netapp_eseries_storagepool_raidlevel: raidDiskPool
+    netapp_eseries_storagepool_drive_type: hdd
+    netapp_eseries_storagepool_drive_count: 36 
+  dp_ssd_01:
+    netapp_eseries_storagepool_raidlevel: raidDiskPool
+    netapp_eseries_storagepool_drive_type: ssd
+    netapp_eseries_storagepool_drive_count: 14
+
+netapp_eseries_volumes:
+  client01_prim_iscsi:
+    storage_pool_name: dp_ssd_01
+    netapp_eseries_volume_size: 3700
+    lunnumber: 0
+    target: client01_zzz2
+  client01_cold_iscsi:
+    storage_pool_name: dp_hdd_01
+    netapp_eseries_volume_size: 25000
+    lunnumber: 1
+    target: client01_zzz2
+  client02_prim_iscsi:
+    storage_pool_name: dp_ssd_01
+    netapp_eseries_volume_size: 3700
+    lunnumber: 0
+    target: client02_zzz2
+  client02_cold_iscsi:
+    storage_pool_name: dp_hdd_01
+    netapp_eseries_volume_size: 25000
+    lunnumber: 1
+    target: client02_zzz2
+  client03_prim_iscsi:
+    storage_pool_name: dp_ssd_01
+    netapp_eseries_volume_size: 3700
+    lunnumber: 0
+    target: client03_zzz2
+  client03_cold_iscsi:
+    storage_pool_name: dp_hdd_01
+    netapp_eseries_volume_size: 25000
+    lunnumber: 1
+    target: client03_zzz2
+  client04_prim_iscsi:
+    storage_pool_name: dp_ssd_01
+    netapp_eseries_volume_size: 3700
+    lunnumber: 0
+    target: client04_zzz2
+  client04_cold_iscsi:
+    storage_pool_name: dp_hdd_01
+    netapp_eseries_volume_size: 25000
+    lunnumber: 2
+    target: client04_zzz2
+
+netapp_eseries_hosts:
+  client01_zzz2:
+    netapp_eseries_host_type_index: 28
+    ports:
+      type: iscsi
+      port: iqn.1994-05.com.example:com.example.zzz2.client01
+      label: client_index01_iscsi
+  client02_zzz2:
+    netapp_eseries_host_type_index: 28
+    ports:
+      type: iscsi
+      port: iqn.1994-05.com.example:com.example.zzz2.client02
+      label: client_index02_iscsi
+  client03_zzz2:
+    netapp_eseries_host_type_index: 28
+    ports:
+      type: iscsi
+      port: iqn.1994-05.com.example:com.example.zzz2.client03
+      label: client_index03_iscsi
+  client04_zzz2:
+    netapp_eseries_host_type_index: 28
+    ports:
+      type: iscsi
+      port: iqn.1994-05.com.example:com.example.zzz2.client04
+      label: client_index04_iscsi
+

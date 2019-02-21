@@ -1,0 +1,3 @@
+netapp_eseries_array_password: "{{ vault_netapp_eseries_array_password }}"
+netapp_eseries_api_password: "{{ vault_netapp_eseries_api_password }}"
+

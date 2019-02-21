@@ -1,0 +1,8 @@
+---
+- name: configure eseries 
+  hosts: eseries-all 
+  connection: local
+  gather_facts: false 
+  serial: 1
+  tasks:
+    - include: roles/na-eseries/tasks/main.yml

@@ -1,0 +1,127 @@
+---
+  - name: create eseries storage system in web service proxy
+    netapp_e_storage_system:
+      ssid: "{{ item.key }}"
+      state: present
+      api_url: "{{ netapp_eseries_api_url }}"
+      api_username: "{{ netapp_eseries_api_username }}"
+      api_password: "{{ netapp_eseries_api_password }}"
+      array_password: "{{ netapp_eseries_array_password }}"
+      controller_addresses:
+        - "{{ item.value.address1 }}"
+        - "{{ item.value.address2 }}"
+    with_dict: "{{ netapp_eseries_storage_systems }}"
+
+  - name: create eseries storage pool
+    netapp_e_storagepool:
+      ssid: "{{ netapp_eseries_ssid }}"
+      api_url: "{{ netapp_eseries_api_url }}"
+      api_username: "{{ netapp_eseries_api_username }}"
+      api_password: "{{ netapp_eseries_api_password }}"
+      state: present
+      name: "{{  item.key }}"
+      raid_level: "{{ item.value.netapp_eseries_storagepool_raidlevel }}"
+      criteria_drive_type: "{{ item.value.netapp_eseries_storagepool_drive_type }}"
+      criteria_drive_count: "{{ item.value.netapp_eseries_storagepool_drive_count }}"
+    with_dict: "{{ netapp_eseries_storage_pools }}"
+
+  - name: get a list of storage pool ids
+    uri:
+      url: "{{ netapp_eseries_api_url }}/storage-systems/{{ netapp_eseries_ssid }}/storage-pools"
+      method: GET
+      user: "{{ netapp_eseries_api_username }}"
+      password: "{{ netapp_eseries_api_password }}"
+      force_basic_auth: yes
+      headers:
+        Content-Type: 'application/json'
+      body_format: json
+    register: result
+
+  - name: debug storage pools ids
+    debug:
+      var: result.json | map(attribute='id') | list
+
+  - set_fact:
+      existing_diskpools: "{{ result.json | map(attribute='id') | list }}"
+
+  - name: update reservedDriveCount to 1
+    uri:
+      url: "{{ netapp_eseries_api_url }}/storage-systems/{{ netapp_eseries_ssid }}/storage-pools/{{ item }}"
+      method: POST
+      user: "{{ netapp_eseries_api_username }}"
+      password: "{{ netapp_eseries_api_password }}"
+      force_basic_auth: yes
+      headers:
+        Content-Type: 'application/json'
+      body_format: json
+      body:
+        reservedDriveCount: 1
+    with_items: "{{ existing_diskpools }}"
+
+  - name: create eseries volume
+    netapp_e_volume:
+      ssid: "{{ netapp_eseries_ssid }}"
+      api_url: "{{ netapp_eseries_api_url }}"
+      api_username: "{{ netapp_eseries_api_username }}"
+      api_password: "{{ netapp_eseries_api_password }}"
+      name: "{{ item.key }}"
+      state: present
+      storage_pool_name: "{{ item.value.storage_pool_name }}"
+      size: "{{ item.value.netapp_eseries_volume_size }}"
+    with_dict: "{{ netapp_eseries_volumes }}"
+
+  - name: get list of eseries host
+    uri:
+      url: "{{ netapp_eseries_api_url }}/storage-systems/{{ netapp_eseries_ssid }}/hosts"
+      method: GET
+      user: "{{ netapp_eseries_api_username }}"
+      password: "{{ netapp_eseries_api_password }}"
+      force_basic_auth: yes
+      headers:
+        Content-Type: 'application/json'
+    register: result
+
+  - name: isolate the host name
+    debug:
+      var: result.json | map(attribute='name') | list
+
+  - set_fact:
+      existing_hosts: "{{ result.json | map(attribute='name') | list }}"
+
+  - name: define the host and port
+    uri:
+      url: "{{ netapp_eseries_api_url }}/storage-systems/{{ netapp_eseries_ssid }}/hosts"
+      method: POST
+      user: "{{ netapp_eseries_api_username }}"
+      password: "{{ netapp_eseries_api_password }}"
+      force_basic_auth: yes
+      headers:
+        Content-Type: 'application/json'
+      body_format: json
+      body:
+        name: "{{ item.key }}"
+        hostType:
+          index: "{{ item.value.netapp_eseries_host_type_index }}"
+        ports:
+          type: "{{ item.value.ports.type }}"
+          port: "{{ item.value.ports.port }}"
+          label: "{{ item.value.ports.label }}"
+      body_format: json
+      status_code: 201
+    with_dict: "{{ netapp_eseries_hosts }}"
+    when:
+      - item.key not in existing_hosts
+
+  - name: create eseries lunmapping
+    netapp_e_lun_mapping:
+      ssid: "{{ netapp_eseries_ssid }}"
+      api_url: "{{ netapp_eseries_api_url }}"
+      api_username: "{{ netapp_eseries_api_username }}"
+      api_password: "{{ netapp_eseries_api_password }}"
+      state: present
+      lun: "{{ item.value.lunnumber }}"
+      target: "{{ item.value.target }}"
+      volume_name: "{{ item.key }}"
+      target_type: 'host'
+    with_dict: "{{ netapp_eseries_volumes }}"
+

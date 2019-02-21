@@ -1,0 +1,9 @@
+[eseries-all:children]
+netapp-eseries-ZZZ2
+netapp-eseries-XXX2
+
+[netapp-eseries-ZZZ2]
+na-eseries-zzz2
+
+[netapp-eseries-XXX2]
+na-eseries-xxx2
